@@ -1,0 +1,394 @@
+---
+title: "STA 104 Project"
+author: "Arya Gupta"
+date: "2023-12-07"
+output: html_document
+---
+
+# Introduction
+In this project, I conduct statistical analysis on four different samples from various distributions. Problem one consists of one dataset, problems 2 and 3 consist of 2 datasets, and problem 4 consists of 4 datasets. I aim to test hypotheses using non-parametric procedures learned in class or researched on our own and compare the results with normal and t-tests. I also compute diagnostics to understand our data better, including normal probability plots, histograms, and boxplots. The project’s goal is to accomplish our tasks with the use of randomization techniques such as permutation distributions or Monte Carlo simulations.
+
+
+
+# 1)
+
+For Question 1, we tested the hypothesis $H_0$: μ = 0 against $H_a$ : μ>0. We employed the binomial test based on the median and compared the results with the one-sample t-test. My statistic for the binomial test was 4.38178. Since 4.38178 is larger than 1.645, we reject the null hypothesis and conclude that the mean is greater than 0. For the t-test, I received a statistic of 2.1569 and a p-value of 0.01972, confirming our outcome from the binomial test of rejecting the null hypothesis.
+
+For diagnostics, I created a normal probability plot, histograms, and boxplot. 
+The histogram provides a visual representation of the data's distribution. The data is right-skewed and contains an outlier (30.42). This skewness might indicate a departure from normality. The boxplot also confirms the presence of an outlier, and the normal probability plot shows a deviation from a straight line, suggesting departures from normality. I also conducted the Shapiro-Wilk Test, which is a formal statistical test for normality. Since the p-value from the test is very small, we can reject the null hypothesis of normality.
+
+```{r}
+
+data <- c(-0.189, 4.538, 1.48, 1.394, 0.73, 0.975, 0.246,
+          1.243, -0.313, 0.181, 1.179, 1.111, 2.463, 0.372, 2.614, 2.112, 
+          30.42, 1.105, 0.437, 1.404, 1.57, 1.509, 0.4, 2.176, -0.885, 1.111, 2.463, 0.437, 1.394, 0.63)
+
+
+df <- data.frame(value = data)
+
+
+library(ggplot2)
+library(gridExtra)
+
+
+hist_plot <- ggplot(df, aes(x = value)) +
+  geom_histogram(binwidth = 2, fill = "blue", color = "black", alpha = 0.7) +
+  labs(title = "Histogram")
+
+
+boxplot_plot <- ggplot(df, aes(y = value)) +
+  geom_boxplot(fill = "green", color = "black", alpha = 0.7) +
+  labs(title = "Boxplot")
+
+
+qq_plot <- ggplot(df, aes(sample = value)) +
+  stat_qq() +
+  stat_qq_line() +
+  labs(title = "Normal Probability Plot")
+
+
+grid_plots <- grid.arrange(hist_plot, boxplot_plot, qq_plot, ncol = 2)
+ggsave("plots#1.png", grid_plots, width = 10, height = 8, units = "in")
+
+```
+```{r}
+shapiro_test <- shapiro.test(df$value)
+shapiro_test
+
+```
+
+```{r}
+data = c(-0.189, 4.538, 1.48, 1.394, 0.73, 0.975, 0.246,
+      1.243, -0.313, 0.181, 1.179, 1.111, 2.463, 0.372, 2.614, 2.112, 
+      30.42, 1.105, 0.437, 1.404, 1.57, 1.509, 0.4, 2.176, -0.885, 1.111, 2.463, 0.437, 1.394, 0.63)
+
+B = length(data[data > 0])
+n = length(data)
+
+Z_b = (B - (0.5*n))/(sqrt(0.25*n))
+Z_b
+```
+
+
+```{r}
+t_test_result <- t.test(data, alternative = "greater")
+t_test_result
+```
+
+
+
+```{r}
+p_value <- 1 - pnorm(Z_b)
+print(p_value)
+```
+
+# 2)
+
+For the normal probability plot, both datasets 1 and 2 show a deviation from normality, with a significant outlier in dataset 2. The histogram shows that both datasets are right skewed, and the boxplot confirms the presence of an outlier in dataset 2. 
+
+
+```{r}
+dataset1 <- c(0.431, 2.145, 0.662, 1.277, 0.946, 3.505, 0.058, 0.184, 0.975, 0.527,
+              0.39, 1.642, 2.603, 0.309, 0.422, 5.511, 0.599, 0.364, 2.862, 0.904,
+              0.653, 4.713, 2.851, 2.311, 5.21, 1.642, 2.603, 2.862, 1.277, 0.946)
+
+dataset2 <- c(2.059, 1.945, 5.894, 9.204, 5.138, 3.042, 1.384, 0.791, 28.216, 5.365,
+              7.105, 6.036, 0.944, 2.186, 8.899, 11.596, 2.178, 0.486, 0.119, 1.115,
+              2.109, 2.734, 3.337, 1.697, 4.947, 6.036, 0.944, 0.119, 9.204, 12.138)
+```
+
+
+```{r}
+par(mfrow = c(1, 2))
+qqnorm(dataset1, main = "QQ Plot - Dataset1"); qqline(dataset1, col = 2)
+qqnorm(dataset2, main = "QQ Plot - Dataset2"); qqline(dataset2, col = 2)
+dev.copy(png, "#2QQplot.png")
+dev.off()
+
+```
+```{r}
+par(mfrow = c(1, 2))
+hist(dataset1, main = "Hist - Dataset1", xlab = "Values", col = "lightblue", border = "black")
+hist(dataset2, main = "Hist - Dataset2", xlab = "Values", col = "lightblue", border = "black")
+dev.copy(png, "#2hist.png")
+dev.off()
+
+```
+```{r}
+par(mfrow = c(1, 2))
+boxplot(dataset1, main = "Boxplot - Dataset1", col = "lightgreen", border = "black")
+boxplot(dataset2, main = "Boxplot - Dataset2", col = "lightgreen", border = "black")
+dev.copy(png, "#2box.png")
+dev.off()
+
+```
+
+
+
+### 2a)
+
+For the comparison of means in Question 2 ($H_0$ : μ1 = μ2 vs $H_A$ : μ1 < μ2), I conducted a Wilcoxon rank-sum test using a permutation distribution along with a two-sample t-test. The Wilcoxon does not assume normality. For the Wilcoxon rank-sum test, I received a test-statistic of 248 and a p-value of 0.0012. As a result, I would reject the null hypothesis of equal means. The t-test supported the Wilcoxon rank-sum test as I received a test statistic of -3.018347 and a p-value of 0.002425648. These results support rejecting the null hypothesis. 
+
+
+
+```{r}
+library(ggplot2)
+set.seed(123)
+
+dataset1 <- c(0.431, 2.145, 0.662, 1.277, 0.946, 3.505, 0.058, 0.184, 0.975, 0.527,
+              0.39, 1.642, 2.603, 0.309, 0.422, 5.511, 0.599, 0.364, 2.862, 0.904,
+              0.653, 4.713, 2.851, 2.311, 5.21, 1.642, 2.603, 2.862, 1.277, 0.946)
+
+dataset2 <- c(2.059, 1.945, 5.894, 9.204, 5.138, 3.042, 1.384, 0.791, 28.216, 5.365,
+              7.105, 6.036, 0.944, 2.186, 8.899, 11.596, 2.178, 0.486, 0.119, 1.115,
+              2.109, 2.734, 3.337, 1.697, 4.947, 6.036, 0.944, 0.119, 9.204, 12.138)
+
+wilcoxon_statistic <- function(x, y) {
+  n1 <- length(x)
+  n2 <- length(y)
+  all_data <- c(x, y)
+  ranks <- rank(all_data)
+  sum_ranks1 <- sum(ranks[1:n1])
+  wilcoxon_stat <- sum_ranks1 - n1 * (n1 + 1) / 2
+  return(wilcoxon_stat)
+}
+
+perm_test <- function(x, y, n_permutations = 10000) {
+  observed_stat <- wilcoxon_statistic(x, y)
+  all_data <- c(x, y)
+  n1 <- length(x)
+  n2 <- length(y)
+  n <- n1 + n2
+  perm_stats <- numeric(n_permutations)
+  
+  for (i in 1:n_permutations) {
+    perm_indices <- sample(1:n, n, replace = FALSE)
+    perm_x <- all_data[perm_indices[1:n1]]
+    perm_y <- all_data[perm_indices[(n1 + 1):n]]
+    perm_stats[i] <- wilcoxon_statistic(perm_x, perm_y)
+  }
+  
+  p_value <- sum(perm_stats <= observed_stat) / n_permutations
+  return(list(statistic = observed_stat, p_value = p_value))
+}
+
+wilcoxon_test_result <- perm_test(dataset1, dataset2)
+t_test_result <- t.test(dataset1, dataset2, alternative = "less")
+
+cat("Wilcoxon Rank-Sum Test Statistic:", wilcoxon_test_result$statistic, "\n")
+cat("Wilcoxon Rank-Sum Test p-value:", wilcoxon_test_result$p_value, "\n")
+cat("Two-Sample t-Test Statistic:", t_test_result$statistic, "\n")
+cat("Two-Sample t-Test p-value:", t_test_result$p.value, "\n")
+
+```
+
+
+
+### 2b)
+
+For the comparison of variances in Question 2 ($H_0$ : $σ_1$ = $σ_2$ vs $H_A$ : $σ_1$ != $σ_2$), I calculated the ratio of sample variances using a permutation distribution along with an F-test to compare. The ratio of Variances was 0.0736 and the p-value was 0.9725. As a result, I would fail to reject the null hypothesis of equal variances. The F-test did not support this however, as I received a test statistic of 0.073651 and a p-value of 4.319e-10. These may differ as the F-test assumes normality, which was not found within this data.
+
+```{r}
+all_data <- list(
+  dataset1,
+  dataset2
+)
+
+combined_data <- unlist(all_data)
+ratio_var <- var(dataset1) / var(dataset2)
+perm_stats <- replicate(10000, {
+  perm_data <- sample(combined_data)
+  perm_var_ratio <- var(perm_data[1:length(dataset1)]) / var(perm_data[(length(dataset1) + 1):length(perm_data)])
+  perm_var_ratio
+})
+
+p_value_perm <- mean(perm_stats >= ratio_var)
+
+cat("\nPermutation Test on Variances:\n")
+cat("Ratio of Variances:", ratio_var, "\n")
+cat("P-value:", p_value_perm, "\n")
+
+```
+```{r}
+f_test_result <- var.test(dataset1, dataset2)
+
+cat("\nF-Test for Equality of Variances:\n")
+print(f_test_result)
+
+```
+
+# 3)
+
+For the normal probability plot, both datasets 1 and 2 show a deviation from normality, with dataset 2 deviating significantly more from normality. The histogram shows that dataset 1 is slightly left-skewed, while dataset 2 is much more normal, but still right skewed. The boxplot confirms the presence of an outlier in dataset 1. 
+
+For Question 3, we utilized the Kolmogorov-Smirnov test to compare distributions. The non-parametric test confirmed differences between the distributions, with a KS Statistic of 0.4 and a p-value of 0.0103.
+
+```{r}
+dataset1 <- c(6.292, 11.124, 7.498, 15.372, 9.574, 13.28, -1.56, 10.67, 11.942, 5.274,
+              4.748, 7.659, 9.152, -0.234, 15.71, 11.798, 10.639, 15.157, 19.944, 7.792,
+              7.032, 5.368, 16.593, 9.129, 10.957, 7.659, 9.152, 19.944, 15.372, 10.574)
+
+dataset2 <- c(15.263, 2.112, 0.556, 4.926, 12.832, 10.43, 13.974, 15.812, 3.788, 12.552,
+              1.866, 17.539, 16.918, 30.529, 26.947, 13.393, 17.643, 16.672, 18.815, 20.711, 16.834, 5.948, 1.116, -3.345, 12.487, 17.539, 16.918, 18.815, 4.926, 13.832)
+
+par(mfrow = c(1, 2))
+qqnorm(dataset1, main = "Normal Probability Plot - Dataset1"); qqline(dataset1, col = 2)
+qqnorm(dataset2, main = "Normal Probability Plot - Dataset2"); qqline(dataset2, col = 2)
+dev.copy(png, "#3qqnorm.png")
+dev.off()
+```
+```{r}
+par(mfrow = c(1, 2))
+hist(dataset1, main = "Histogram - Dataset1", xlab = "Values", col = "lightblue", border = "black")
+hist(dataset2, main = "Histogram - Dataset2", xlab = "Values", col = "lightblue", border = "black")
+dev.copy(png, "#3hhist.png")
+dev.off()
+
+```
+```{r}
+par(mfrow = c(1, 2))
+boxplot(dataset1, main = "Boxplot - Dataset1", col = "lightgreen", border = "black")
+boxplot(dataset2, main = "Boxplot - Dataset2", col = "lightgreen", border = "black")
+dev.copy(png, "#3box.png")
+dev.off()
+```
+
+
+```{r}
+ks_statistic <- function(data1, data2) {
+  ecdf1 <- ecdf(data1)
+  ecdf2 <- ecdf(data2)
+  ks_stat <- max(abs(ecdf1(data1) - ecdf2(data1)))
+  return(ks_stat)
+}
+
+dataset1 <- c(6.292, 11.124, 7.498, 15.372, 9.574, 13.28, -1.56, 10.67, 11.942, 5.274,
+              4.748, 7.659, 9.152, -0.234, 15.71, 11.798, 10.639, 15.157, 19.944, 7.792,
+              7.032, 5.368, 16.593, 9.129, 10.957, 7.659, 9.152, 19.944, 15.372, 10.574)
+
+dataset2 <- c(15.263, 2.112, 0.556, 4.926, 12.832, 10.43, 13.974, 15.812, 3.788, 12.552,
+              1.866, 17.539, 16.918, 30.529, 26.947, 13.393, 17.643, 16.672, 18.815, 20.711, 16.834, 5.948, 1.116, -3.345, 12.487, 17.539, 16.918, 18.815, 4.926, 13.832)
+
+observed_ks <- ks_statistic(dataset1, dataset2)
+num_permutations <- 10000
+
+permuted_ks_statistics <- numeric(num_permutations)
+
+for (i in 1:num_permutations) {
+  permuted_data <- sample(c(dataset1, dataset2))
+  
+  permuted_data1 <- permuted_data[1:length(dataset1)]
+  permuted_data2 <- permuted_data[(length(dataset1) + 1):length(permuted_data)]
+  
+  permuted_ks_statistics[i] <- ks_statistic(permuted_data1, permuted_data2)
+}
+
+p_value <- mean(permuted_ks_statistics >= observed_ks)
+
+cat("Observed KS Statistic:", observed_ks, "\n")
+cat("Permutation Test p-value:", p_value, "\n")
+
+
+```
+
+
+# 4)
+
+For the normal probability plot, all four datasets show a deviation from normality. Datasets 1,2, and 4 all show outliers, and dataset 3 deviates the most. Histograms for all four datasets show a significant right skew, and the boxplot confirms the presence of multiple outliers for all datasets.
+
+In analyzing Question 4 ($H_0$ : $μ_1$ = $μ_2$ = $μ_3$ = $μ_4$ vs the alternative), I conducted a Kruskal-Wallis test and an ANOVA test to compare. The Kruskal-Wallis test is appropriate for comparing the means of multiple groups when normality assumptions are not met. I received a Kruskal-Wallis test statistic of 372.5202 with a p-value of 0. The ANOVA F-Statistic test, however, did not support the conclusions of the Kruskal-Wallis test. I received a 2.736394 statistic and  a p-value of 0.1007436. This may be because the F-test assumes normality, which was not the case within these datasets.
+
+
+```{r}
+dataset3 <- c(0.172, 1.736, 169.179, 0.778, 1.027, 1.315, 2.366, 3.813, 1.926, 4.675,
+               0.143, 13.426, 2.309, 0.281, 0.594, 14.336, 52.786, 0.779, 0.315, 0.048,
+               1.583, 0.161, 7.961, 8.055, 3.342, 13.426, 2.309, 0.315, 0.778, 2.027)
+
+dataset4 <- c(182.982, 0.198, 6.864, 2.559, 5.256, 1.501, 0.542, 7.058, 1.204, 162.075,
+               0.39, 0.251, 1.258, 4.097, 16.177, 0.72, 9.968, 1.122, 3.717, 9.193,
+               0.85, 2.016, 0.046, 0.079, 0.195, 0.251, 1.258, 3.717, 2.559, 4.256)
+
+dataset5 <- c(80.621, 0.564, 4.943, 110.53, 9.719, 0.026, 1.853, 2.115, 8.805, 68.658,
+               0.011, 14.083, 86.57, 7.506, 1.203, 6.759, 20.603, 0.287, 23.956, 0.206,
+               0.329, 0.316, 2.585, 15.44, 69.595, 14.083, 96.57, 23.956, 110.53, 12.719)
+
+dataset6 <- c(46.235, 3.668, 3.005, 0.874, 0.966, 1.403, 377.543, 0.858, 12.308, 11.111,
+               0.212, 51.477, 0.474, 1.759, 29.087, 18.817, 16.592, 17.778, 21.715, 4.708,
+               0.461, 6.01, 0.24, 106.616, 20.074, 51.477, 0.474, 21.715, 0.874, 1.966)
+```
+
+```{r}
+par(mfrow = c(2, 2))
+qqnorm(dataset3, main = "Normal Probability Plot - Dataset3"); qqline(dataset3, col = 2)
+qqnorm(dataset4, main = "Normal Probability Plot - Dataset4"); qqline(dataset4, col = 2)
+qqnorm(dataset5, main = "Normal Probability Plot - Dataset5"); qqline(dataset5, col = 2)
+qqnorm(dataset6, main = "Normal Probability Plot - Dataset6"); qqline(dataset6, col = 2)
+dev.copy(png, "4QQ.png")
+dev.off()
+```
+
+
+```{r}
+par(mfrow = c(2, 2))
+hist(dataset3, main = "Histogram - Dataset3", xlab = "Values", col = "lightblue", border = "black")
+hist(dataset4, main = "Histogram - Dataset4", xlab = "Values", col = "lightblue", border = "black")
+hist(dataset5, main = "Histogram - Dataset5", xlab = "Values", col = "lightblue", border = "black")
+hist(dataset6, main = "Histogram - Dataset6", xlab = "Values", col = "lightblue", border = "black")
+dev.copy(png, "4hist.png")
+dev.off()
+```
+
+```{r}
+par(mfrow = c(2, 2))
+boxplot(dataset3, main = "Boxplot - Dataset3", col = "lightgreen", border = "black")
+boxplot(dataset4, main = "Boxplot - Dataset4", col = "lightgreen", border = "black")
+boxplot(dataset5, main = "Boxplot - Dataset5", col = "lightgreen", border = "black")
+boxplot(dataset6, main = "Boxplot - Dataset6", col = "lightgreen", border = "black")
+dev.copy(png, "4box.png")
+dev.off()
+```
+
+
+```{r}
+all_data <- list(
+  dataset3,
+  dataset4,
+  dataset5,
+  dataset6
+)
+
+combined_data <- unlist(all_data)
+ranked_data <- rank(combined_data)
+
+rank_sums <- tapply(ranked_data, rep(1:4, each = length(combined_data)/4), sum)
+H_statistic <- (12 / (length(combined_data) * (length(combined_data) + 1))) * sum((rank_sums^2) / table(rep(1:4, each = length(combined_data)/4)))
+
+num_permutations <- 10000
+permuted_stats <- numeric(num_permutations)
+
+for (i in 1:num_permutations) {
+  shuffled_ranks <- sample(ranked_data)
+  shuffled_rank_sums <- tapply(shuffled_ranks, rep(1:4, each = length(combined_data)/4), sum)
+  permuted_stats[i] <- (12 / (length(combined_data) * (length(combined_data) + 1))) * sum((shuffled_rank_sums^2) / table(rep(1:4, each = length(combined_data)/4)))
+}
+
+data_frame <- data.frame(value = combined_data, group = rep(1:4, each = length(combined_data)/4))
+anova_model <- aov(value ~ group, data = data_frame)
+anova_f_statistic <- summary(anova_model)[[1]][1, 4]
+
+p_value_kw <- 1 - pchisq(H_statistic, df = 3)
+p_value_anova <- summary(anova_model)[[1]][1, 5]
+
+cat("Kruskal-Wallis Test Statistic:", H_statistic, "\n")
+cat("P-value (Kruskal-Wallis):", p_value_kw, "\n\n")
+
+cat("ANOVA F-Statistic:", anova_f_statistic, "\n")
+cat("P-value (ANOVA):", p_value_anova, "\n")
+
+```
+
+# Conclusion
+
+In summary, I used a binomial test, Wilcoxon rank-sum test, Kolmogorov-Smirnov test, and a Kruskal-Wallis test to achieve my results. I found that when comparing to the t-test, many of my nonparametric results matched, however my results did not match with the F-test. With a lack of normality within the data, it’s clear that non-parametric tests often provide robust results comparable to traditional methods. Diagnostics was invaluable as it assisted in identifying assumptions and choosing the appropriate statistical methods, and randomization techniques such as the permutation test enhanced the robustness of the analyses. 
+
+
